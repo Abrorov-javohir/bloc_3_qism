@@ -25,7 +25,7 @@ class CurrencyScreen extends StatelessWidget {
                 return ListTile(
                   title: Text(course.title),
                   subtitle: Text(course.cbPrice.toString()),
-                  onTap: () => _showConversionDialog(context, course),
+                  onTap: () => _showresult(context, course),
                 );
               },
             );
@@ -39,7 +39,7 @@ class CurrencyScreen extends StatelessWidget {
     );
   }
 
-  void _showConversionDialog(BuildContext context, Course course) {
+  void _showresult(BuildContext context, Course course) {
     showDialog(
       context: context,
       builder: (context) {
