@@ -38,6 +38,7 @@ dependencies:
   http: ^1.2.2
   bloc: ^8.1.4
   flutter_bloc: ^8.1.6
+  stream_transform: ^2.1.0
 
 dev_dependencies:
   flutter_test:

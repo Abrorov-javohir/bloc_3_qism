@@ -6,61 +6,129 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CurrencyScreen extends StatelessWidget {
+  const CurrencyScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Valyuta Konvertatsiya")),
-      body: BlocBuilder<CurrencyBloc, CurrencyState>(
-        builder: (context, state) {
-          if (state is CurrencyInitial) {
-            context.read<CurrencyBloc>().add(GetCurrenciesEvent());
-            return Center(child: CircularProgressIndicator());
-          } else if (state is CurrencyLoading) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state is CurrencyLoaded) {
-            return ListView.builder(
-              itemCount: state.courses.length,
-              itemBuilder: (context, index) {
-                final course = state.courses[index];
-                return ListTile(
-                  title: Text(course.title),
-                  subtitle: Text(course.cbPrice.toString()),
-                  onTap: () => _showresult(context, course),
-                );
+      appBar: AppBar(
+        title: const Text(
+          "Courses",
+        ),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (value) {
+                context
+                    .read<CurrencyBloc>()
+                    .add(SearchCurrenciesEvent(query: value));
               },
-            );
-          } else if (state is CurrencyError) {
-            return Center(child: Text(state.message));
-          } else {
-            return Container();
-          }
-        },
+              decoration: const InputDecoration(
+                hintText: "Search for a currency",
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<CurrencyBloc, CurrencyState>(
+              builder: (context, state) {
+                if (state is CurrencyInitial) {
+                  context.read<CurrencyBloc>().add(GetCurrenciesEvent());
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is CurrencyLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is CurrencyLoaded) {
+                  return ListView.builder(
+                    itemCount: state.courses.length,
+                    itemBuilder: (context, index) {
+                      final course = state.courses[index];
+                      return ListTile(
+                        title: Text(course.title),
+                        subtitle: Text("${course.cbPrice.toString()} sum"),
+                        onTap: () {
+                          _showResult(context, course);
+                        },
+                      );
+                    },
+                  );
+                } else if (state is CurrencyConverted) {
+                  return Center(
+                      child: Column(
+                    children: [
+                      TextField(),
+                      AlertDialog(
+                        title: const Text("Converted Amount"),
+                        content: Text(
+                            "Converted amount: ${state.convertedAmount.toString()} UZS"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return const CurrencyScreen();
+                                  },
+                                ),
+                              );
+                              context
+                                  .read<CurrencyBloc>()
+                                  .add(GetCurrenciesEvent());
+                            },
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ));
+                } else if (state is CurrencyError) {
+                  return Center(
+                    child: Text(
+                      state.message,
+                    ),
+                  );
+                } else {
+                  return const Center(
+                    child: Text("Valyuta kurinmadi"),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  void _showresult(BuildContext context, Course course) {
+  void _showResult(BuildContext context, Course course) {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _controller = TextEditingController();
+        final TextEditingController controller = TextEditingController();
         return AlertDialog(
           title: Text("Convert ${course.title}"),
           content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: "Summani kiriting"),
+            controller: controller,
+            decoration: const InputDecoration(hintText: "Summani kiriting"),
             keyboardType: TextInputType.number,
           ),
           actions: [
             TextButton(
               onPressed: () {
-                final amount = double.parse(_controller.text);
+                final amount = double.parse(controller.text);
                 context
                     .read<CurrencyBloc>()
                     .add(ConvertCurrencyEvent(amount: amount, course: course));
                 Navigator.of(context).pop();
               },
-              child: Text("Convert"),
+              child: const Text("Convert"),
             ),
           ],
         );

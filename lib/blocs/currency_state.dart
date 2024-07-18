@@ -1,3 +1,4 @@
+import 'package:bloc/bloc.dart';
 import 'package:bloc_3_qism/data/model/course.dart';
 
 abstract class CurrencyState {}
@@ -23,3 +24,5 @@ class CurrencyError extends CurrencyState {
 
   CurrencyError({required this.message});
 }
+
+
